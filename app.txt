@@ -19,8 +19,10 @@ git commit -m "final commit"
 git checkout main
 git diff main dev
 
+<<<<<<< HEAD
 merge both branch
 go checkout main
 git merge dev
 
 Git is awesome
+Git is powerful
