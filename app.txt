@@ -15,6 +15,6 @@ create branch
 git branch dev
 git checkout dev
 git add app.txt
-git commit -m "final"
+git commit -m "final commit"
 git checkout main
 git diff main dev
