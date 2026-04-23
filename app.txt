@@ -18,3 +18,7 @@ git add app.txt
 git commit -m "final"
 git checkout main
 git diff main dev
+
+merge both branch
+go checkout main
+git merge dev
