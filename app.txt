@@ -22,3 +22,5 @@ git diff main dev
 merge both branch
 go checkout main
 git merge dev
+
+Git is awesome
