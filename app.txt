@@ -18,3 +18,5 @@ git add app.txt
 git commit -m "final commit"
 git checkout main
 git diff main dev
+
+Git is powerful
