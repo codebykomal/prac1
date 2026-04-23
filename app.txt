@@ -1,5 +1,12 @@
-<html>
-<body>
-<b>tomorrow is exam</b>
-</body>
-</html>
+cd prac1
+ls -a
+touch app.txt
+git status
+git remote add origin <url>
+git remote -v
+git push -u origin main
+git remote remove r2
+git diff
+git add .
+git commit -m "2nd commit"
+git push origin main
