@@ -1,1 +1,157 @@
+-----------------------12----------------------------
+# ---------- AWS SETUP (GLOBAL - ONE TIME) ----------
 
+aws configure
+# → AWS CLI configure (Access Key, Secret Key, Region = ap-south-1)
+
+
+# ---------- PROJECT SETUP ----------
+
+mkdir terraform-demo
+# → Terraform project folder create
+
+cd terraform-demo
+# → Folder ke andar jana
+
+notepad main.tf
+# → Terraform config file banana
+
+
+# ---------- PASTE THIS IN main.tf ----------
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_s3_bucket" "demo" {
+  bucket = "my-demo-bucket-12345"
+}
+
+
+# ---------- TERRAFORM COMMANDS ----------
+
+terraform init
+# → Terraform initialize (plugins download)
+
+terraform plan
+# → Kya create hoga preview (FREE)
+
+terraform apply
+# → AWS me resource create (⚠️ may cost)
+
+# type: yes
+
+
+# ---------- CLEANUP (IMPORTANT) ----------
+
+terraform destroy
+# → Sab resource delete (billing avoid)
+
+
+# ---------- VERIFY ----------
+
+# Go to AWS Console → S3 → check bucket
+-----------------------14(s3 backend)--------------
+# ---------- BACKEND (S3 STATE STORAGE) ----------
+terraform {
+  backend "s3" {
+    bucket = "terraform-state-bucket-12345"
+    key    = "terraform/state.tfstate"
+    region = "ap-south-1"
+  }
+}
+
+
+# ---------- PROVIDER ----------
+provider "aws" {
+  region = "ap-south-1"
+}
+
+
+# ---------- RESOURCE ----------
+resource "aws_s3_bucket" "demo" {
+  bucket = "my-demo-bucket-12345"
+}
+-------------------15(VM-EC2)---------------------
+# ---------- TERRAFORM EC2 INSTANCE ----------
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "web" {
+  ami           = "ami-0e12ffc2dd465f6e4"   # Amazon Linux 2023 (Mumbai)
+  instance_type = "t3.micro"
+
+  key_name = "my-key-pair"
+
+  tags = {
+    Name = "Terraform-EC2"
+  }
+}
+-----------------------16(web server)---------------------
+AWS Console open karo
+Search → EC2
+Click → Instances
+Apna instance select karo
+👀 Waha dikhega:
+Public IPv4 address: 13.233.xx.xx
+http://13.233.xx.xx
+
+# ---------- RECIPE 16: WEB SERVER USING TERRAFORM ----------
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+# ---------- SECURITY GROUP (PORT 22 + 80) ----------
+resource "aws_security_group" "web_sg" {
+  name = "web-sg"
+
+  # SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # HTTP
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # OUTBOUND (ALL)
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# ---------- EC2 INSTANCE ----------
+resource "aws_instance" "web" {
+  ami           = "ami-0e12ffc2dd465f6e4"
+  instance_type = "t3.micro"
+
+  associate_public_ip_address = true
+  security_groups = [aws_security_group.web_sg.name]
+
+  # ---------- WEB SERVER INSTALL ----------
+  user_data = <<-EOF
+              #!/bin/bash
+              yum update -y
+              yum install -y httpd
+              systemctl start httpd
+              systemctl enable httpd
+              echo "Hello from Terraform Web Server" > /var/www/html/index.html
+              EOF
+
+  tags = {
+    Name = "Terraform-Web-Server"
+  }
+}
