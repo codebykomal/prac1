@@ -155,3 +155,385 @@ resource "aws_instance" "web" {
     Name = "Terraform-Web-Server"
   }
 }
+
+--------------------------17(db)------------------------
+# ---------- AWS RDS DATABASE ONLY ----------
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+# ---------- SECURITY GROUP ----------
+resource "aws_security_group" "db_sg" {
+  name = "rds-sg"
+
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# ---------- RDS INSTANCE ----------
+resource "aws_db_instance" "db" {
+  engine         = "mysql"
+  engine_version = "8.0"
+
+  instance_class = "db.t3.micro"
+  allocated_storage = 20
+
+  db_name  = "mydb"
+  username = "admin"
+  password = "Admin12345"
+
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+
+  skip_final_snapshot = true
+  publicly_accessible = true
+}
+
+--------------------------------18(web app)----------------
+provider "aws" {
+  region = "ap-south-1"
+}
+
+# ---------- EC2 ----------
+resource "aws_security_group" "web_sg" {
+  name = "web-sg"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "web" {
+  ami           = "ami-0e12ffc2dd465f6e4"
+  instance_type = "t3.micro"
+
+  associate_public_ip_address = true
+  security_groups = [aws_security_group.web_sg.name]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              yum install -y httpd
+              systemctl start httpd
+              echo "Web App Running" > /var/www/html/index.html
+              EOF
+}
+
+# ---------- RDS ----------
+resource "aws_db_instance" "db" {
+  engine         = "mysql"
+  engine_version = "8.0"
+  instance_class = "db.t3.micro"
+  allocated_storage = 20
+
+  db_name  = "webdb"
+  username = "admin"
+  password = "Admin12345"
+
+  skip_final_snapshot = true
+  publicly_accessible  = true
+}
+---------------------VERSION 2: WITH VPC + SUBNET (FULL ARCHITECTURE)----------------
+provider "aws" {
+  region = "ap-south-1"
+}
+
+# ---------- VPC ----------
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+
+# ---------- SUBNET ----------
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+}
+
+# ---------- INTERNET GATEWAY ----------
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
+}
+
+# ---------- ROUTE TABLE ----------
+resource "aws_route_table" "rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+}
+
+resource "aws_route_table_association" "rta" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.rt.id
+}
+
+# ---------- SECURITY GROUP ----------
+resource "aws_security_group" "web_sg" {
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# ---------- EC2 ----------
+resource "aws_instance" "web" {
+  ami           = "ami-0e12ffc2dd465f6e4"
+  instance_type = "t3.micro"
+
+  subnet_id                   = aws_subnet.public.id
+  associate_public_ip_address = true
+
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              yum install -y httpd
+              systemctl start httpd
+              echo "Web App in Custom VPC" > /var/www/html/index.html
+              EOF
+}
+
+# ---------- RDS ----------
+resource "aws_db_instance" "db" {
+  engine         = "mysql"
+  engine_version = "8.0"
+  instance_class = "db.t3.micro"
+  allocated_storage = 20
+
+  db_name  = "webdb"
+  username = "admin"
+  password = "Admin12345"
+
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  skip_final_snapshot = true
+  publicly_accessible  = true
+}
+
+----------------------19(changed)-----------------------------
+resource "aws_instance" "web" {
+  ami           = "ami-0e12ffc2dd465f6e4"
+  instance_type = "t2.micro"   # 🔄 changed
+
+  tags = {
+    Name = "Updated-Web-Server"  # 🔄 changed
+  }
+}
+----------------------------------20(ALB load balancerrrr)------------------------
+provider "aws" {
+  region = "ap-south-1"
+}
+
+# ---------- SECURITY GROUP ----------
+resource "aws_security_group" "web_sg" {
+  name = "web-sg"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# ---------- EC2 INSTANCE 1 ----------
+resource "aws_instance" "web1" {
+  ami           = "ami-0e12ffc2dd465f6e4"
+  instance_type = "t3.micro"
+
+  security_groups = [aws_security_group.web_sg.name]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              yum install -y httpd
+              systemctl start httpd
+              echo "Server 1" > /var/www/html/index.html
+              EOF
+}
+
+# ---------- EC2 INSTANCE 2 ----------
+resource "aws_instance" "web2" {
+  ami           = "ami-0e12ffc2dd465f6e4"
+  instance_type = "t3.micro"
+
+  security_groups = [aws_security_group.web_sg.name]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              yum install -y httpd
+              systemctl start httpd
+              echo "Server 2" > /var/www/html/index.html
+              EOF
+}
+
+# ---------- TARGET GROUP ----------
+resource "aws_lb_target_group" "tg" {
+  name     = "web-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_default_vpc.default.id
+}
+
+# ---------- ATTACH EC2 TO TARGET GROUP ----------
+resource "aws_lb_target_group_attachment" "t1" {
+  target_group_arn = aws_lb_target_group.tg.arn
+  target_id        = aws_instance.web1.id
+  port             = 80
+}
+
+resource "aws_lb_target_group_attachment" "t2" {
+  target_group_arn = aws_lb_target_group.tg.arn
+  target_id        = aws_instance.web2.id
+  port             = 80
+}
+
+# ---------- LOAD BALANCER ----------
+resource "aws_lb" "alb" {
+  name               = "web-alb"
+  internal           = false
+  load_balancer_type = "application"
+
+  security_groups = [aws_security_group.web_sg.id]
+  subnets        = data.aws_subnets.default.ids
+}
+
+# ---------- LISTENER ----------
+resource "aws_lb_listener" "listener" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tg.arn
+  }
+}
+
+# ---------- DEFAULT VPC ----------
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+---------------------------------------21: Managing Infrastructure Dependencies with Terraform----------------
+provider "aws" {
+  region = "ap-south-1"
+}
+
+# ---------- VPC ----------
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "Main-VPC"
+  }
+}
+
+# ---------- SUBNET ----------
+resource "aws_subnet" "main" {
+  vpc_id     = aws_vpc.main.id   # 🔗 implicit dependency
+  cidr_block = "10.0.1.0/24"
+
+  tags = {
+    Name = "Main-Subnet"
+  }
+}
+
+# ---------- SECURITY GROUP ----------
+resource "aws_security_group" "web_sg" {
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# ---------- EC2 INSTANCE ----------
+resource "aws_instance" "web" {
+  ami           = "ami-0e12ffc2dd465f6e4"
+  instance_type = "t3.micro"
+
+  subnet_id              = aws_subnet.main.id  # 🔗 implicit dependency
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  tags = {
+    Name = "Web-Server"
+  }
+
+  # 🔴 explicit dependency (optional)
+  depends_on = [aws_subnet.main]
+}
+
+----------------------Recipe 22: Using Terraform for Zero-Downtime Deployment------------------------
+
