@@ -1,4 +1,6 @@
 lint chk------
+cd .git/hooks
+
 #!/bin/sh
 
 echo "Lint check chal raha hai..."
