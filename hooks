@@ -18,12 +18,12 @@ if [ ! -s file.txt ]; then
     exit 1
 fi
 chmod +x .git/hooks/pre-commit
-
+ch ../..
 -----2--
 echo "error" >> file.txt
 git add file.txt
 git commit -m "test lint"
----------pre push
+---------pre push---------------
 cd .git/hooks
 touch pre-push
 notepad pre-push
@@ -47,14 +47,53 @@ git commit -m "test"
 git push origin main
 
 -----post-merge
-notepad .git/hooks/post-merge
-----
-#!/bin/sh
+# ================= POST-MERGE HOOK =================
 
-echo "Merge complete!"
+# Go inside hooks folder
+cd .git/hooks
 
-# Example: auto message
-echo "Project updated successfully"
+# Create post-merge hook file
+touch post-merge
 
-----
-git merge branch_name
+# Open post-merge manually and add:
+
+#!/bin/bash
+
+echo "✅ Merge completed successfully"
+
+# Example automatic task after merge
+# Update dependencies / build / notification etc.
+
+# Save file
+
+
+# Give executable permission
+chmod +x post-merge
+
+
+# ================= TEST POST-MERGE =================
+
+# Go back to project folder
+cd ../..
+
+# Create branch
+git checkout -b dev
+
+# Open app.txt manually
+# Add some content
+
+# Stage changes
+git add app.txt
+
+# Commit changes
+git commit -m "Dev changes"
+
+# Switch back to main
+git checkout main
+
+# Merge dev branch
+git merge dev
+
+
+# OUTPUT AFTER MERGE:
+# ✅ Merge completed successfully
