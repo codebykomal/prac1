@@ -1,0 +1,180 @@
+-------------------------------------------------------1--------------------------------------------------------------
+  # Initialize Git Repository
+git init
+
+# Create a file (app.txt)
+echo "Hello Git" > app.txt
+
+# Check repository status
+git status
+
+# Stage file
+git add app.txt
+
+# Commit changes
+git commit -m "Initial commit with app.txt"
+
+# Modify file
+echo "Updated content in app.txt" >> app.txt
+
+# View differences
+git diff
+
+# Stage updated file
+git add app.txt
+
+# Commit updated changes
+git commit -m "Updated app.txt"
+
+# Create dev branch
+git branch dev
+
+# Switch to dev branch
+git checkout dev
+
+# Make changes in dev branch
+echo "Changes made in dev branch" >> app.txt
+
+# Check differences
+git diff
+
+# Stage changes
+git add app.txt
+
+# Commit changes in dev
+git commit -m "Changes added in dev branch"
+
+# Switch back to main branch
+git checkout main
+
+# Compare branches
+git diff main dev
+
+# Show all branches
+git branch
+
+# View commit history
+git log --oneline --graph --all
+---------------------------------------------------------2----------------------------------------------------
+# Initialize Git Repository
+git init
+
+# Create a file
+echo "Initial Project File" > app.txt
+
+# Add file to staging area
+git add app.txt
+
+# Commit initial file
+git commit -m "Initial commit"
+
+# Create dev branch
+git branch dev
+
+# View all branches
+git branch
+
+# Switch to dev branch
+git checkout dev
+
+# Make changes in dev branch
+echo "This change is added in DEV branch" >> app.txt
+
+# Check changes
+cat app.txt
+
+# Stage changes
+git add app.txt
+
+# Commit changes in dev branch
+git commit -m "Updated file in dev branch"
+
+# Switch back to main branch
+git checkout main
+
+# Check file in main branch
+cat app.txt
+
+# Compare main and dev branches
+git diff main dev
+
+# View branch history
+git log --oneline --graph --all
+
+-------------------------------------------------------------------3---------------------------------------------------
+# Initialize Git Repository
+git init
+
+# Create a file manually:
+# Create app.txt in the project folder and write:
+# Hello from Main Branch
+
+# Check repository status
+git status
+
+# Stage file
+git add app.txt
+
+# Commit file
+git commit -m "Initial commit"
+
+# Create dev branch
+git branch dev
+
+# Switch to dev branch
+git checkout dev
+
+# Open app.txt manually and add a new line:
+# Added change from DEV branch
+
+# Check changes
+git status
+
+# Stage changes
+git add app.txt
+
+# Commit changes in dev
+git commit -m "Changes added in dev branch"
+
+# Switch back to main branch
+git checkout main
+
+# Open app.txt manually and add DIFFERENT content:
+# Added change from MAIN branch
+
+# Stage changes
+git add app.txt
+
+# Commit changes in main
+git commit -m "Changes added in main branch"
+
+# Merge dev into main
+git merge dev
+
+# If both branches changed same lines,
+# Git will show MERGE CONFLICT.
+
+# Open app.txt manually.
+# You will see conflict markers like:
+
+# <<<<<<< HEAD
+# Main branch content
+# =======
+# Dev branch content
+# >>>>>>> dev
+
+# Remove conflict markers manually
+# Keep final required content only.
+
+# Save the file.
+
+# Stage resolved file
+git add app.txt
+
+# Commit resolved merge
+git commit -m "Resolved merge conflict"
+
+# View commit history
+git log --oneline --graph --all
+
+----------------------------------------------------4----------------------------------------------------
