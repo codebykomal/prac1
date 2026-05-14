@@ -1,6 +1,7 @@
 lint chk------
 cd .git/hooks
-
+touch pre-commit
+add this content ---
 #!/bin/sh
 
 echo "Lint check chal raha hai..."
@@ -16,8 +17,8 @@ if [ ! -s file.txt ]; then
     echo "❌ file.txt empty hai"
     exit 1
 fi
+chmod +x .git/hooks/pre-commit
 
-echo "✅ Lint passed"
 -----2--
 echo "error" >> file.txt
 git add file.txt
