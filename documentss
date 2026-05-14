@@ -178,3 +178,110 @@ git commit -m "Resolved merge conflict"
 git log --oneline --graph --all
 
 ----------------------------------------------------4----------------------------------------------------
+# Check Git version
+git --version
+
+
+# ---------------- LOCAL REPOSITORY ----------------
+
+# Create a new project folder manually
+# Example:
+# Create folder -> MyProject
+
+# Open terminal inside MyProject folder
+
+# Initialize local repository
+git init
+
+# Create a file manually:
+# app.txt
+# Write some content inside it.
+
+# Check repository status
+git status
+
+# Stage file
+git add app.txt
+
+# Commit file
+git commit -m "Initial commit"
+
+
+# ---------------- REMOTE REPOSITORY ----------------
+
+# Create a repository on GitHub manually
+# Example repository name:
+# myproject
+
+# Connect local repository with remote repository
+git remote add origin https://github.com/USERNAME/myproject.git
+
+# Check configured remote
+git remote -v
+
+
+# ---------------- PUSH CHANGES ----------------
+
+# Push local commits to GitHub
+git push -u origin main
+
+
+# ---------------- CLONE REPOSITORY ----------------
+
+# Clone existing remote repository into local system
+git clone https://github.com/USERNAME/myproject.git
+
+# Move inside cloned repository
+cd myproject
+
+
+# ---------------- FETCH UPDATES ----------------
+
+# Fetch latest updates from remote repository
+git fetch
+
+# View fetched changes
+git log --oneline --all --graph
+
+
+# ---------------- PULL CHANGES ----------------
+
+# Download and merge latest remote changes
+git pull origin main
+
+
+# ---------------- MAKE NEW CHANGES ----------------
+
+# Open app.txt manually
+# Add or modify content
+
+# Check status
+git status
+
+# Stage updated file
+git add app.txt
+
+# Commit updated changes
+git commit -m "Updated app.txt"
+
+
+# ---------------- PUSH UPDATED CHANGES ----------------
+
+# Upload latest commits to remote repository
+git push origin main
+
+
+# ---------------- VIEW BRANCHES ----------------
+
+# Show local branches
+git branch
+
+# Show remote branches
+git branch -r
+
+# Show all branches
+git branch -a
+
+note - git pull origin main --allow-unrelated-histories
+--------------------------------------------------------5---------------------------------
+
